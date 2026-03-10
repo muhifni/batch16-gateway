@@ -44,10 +44,11 @@ class AuthHeaderFilter(
                 val token = getToken(request) ?: throw UnauthorizeException("UNAUTHORIZED (TOKEN NOT FOUND)")
 
                 val claims = jwtUtil.decode(token)
-                exchange.request.mutate()
+                val mutatedRequest = exchange.request.mutate()
                     .header("X-USER-ID", claims["userId"].toString())
-                    .header("Authority", claims["Authority"].toString())
+                    .header("X-ROLE", claims["authority"].toString())
                     .build()
+                return@GatewayFilter chain.filter(exchange.mutate().request(mutatedRequest).build())
             }
 
             chain.filter(exchange)

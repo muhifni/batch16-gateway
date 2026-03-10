@@ -1,5 +1,6 @@
 package com.batch16.gateway.config
 
+import com.batch16.gateway.exception.UnauthorizeException
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
@@ -13,11 +14,11 @@ import javax.crypto.SecretKey
 class JwtUtil(
     // Mengambil secret key dari application.yml (app.jwt.secret-key atau jwt.secret-key)
     @Value("\${jwt.secret-key}")
-    private val secretKeyStr: String
+    private val jwtSecreteKey: String
 ) {
 
     private val key: SecretKey by lazy {
-        Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKeyStr))
+        Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecreteKey))
     }
 
     /**
@@ -33,7 +34,7 @@ class JwtUtil(
                 .parseSignedClaims(token)
                 .payload
         } catch (e: JwtException) {
-            throw RuntimeException("INVALID OR EXPIRED TOKEN")
+            throw UnauthorizeException("INVALID OR EXPIRED TOKEN")
         } catch (e: IllegalArgumentException) {
             throw RuntimeException("TOKEN IS EMPTY OR NULL")
         }

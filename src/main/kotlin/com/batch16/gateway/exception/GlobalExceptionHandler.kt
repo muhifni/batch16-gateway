@@ -6,28 +6,34 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.server.ServerWebExchange
 
-@ControllerAdvice
+@RestControllerAdvice
 class GlobalExceptionHandler {
 
     @ExceptionHandler(UnauthorizeException::class)
-    fun handleUnauthorizedException(e: UnauthorizeException): ResponseEntity<BaseResponse<String>> {
-
-        val responseBody = BaseResponse<String>(
-            message = "You are not authorized",
-            error = e.message
+    fun handleUnauthorizedException(
+        e: UnauthorizeException,
+        exchange: ServerWebExchange
+    ): ResponseEntity<BaseResponse<String>> {
+        return ResponseEntity(
+            BaseResponse(
+                message = "Unauthorized",
+                error = e.message
+            ),
+            HttpStatus.UNAUTHORIZED
         )
-
-        return ResponseEntity(responseBody, HttpStatus.UNAUTHORIZED)
     }
 
     @ExceptionHandler(ExpiredJwtException::class)
     fun handleJwtExpiredException(
-        e: ExpiredJwtException
+        e: ExpiredJwtException,
+        exchange: ServerWebExchange
     ): ResponseEntity<BaseResponse<String>> {
         return ResponseEntity(
             BaseResponse(
-                message = "UNAUTHORIZED",
+                message = "Unauthorized",
                 error = "Token expired"
             ),
             HttpStatus.UNAUTHORIZED
